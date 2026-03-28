@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+}
+
+@layer components {
+  .board {
+    @apply grid grid-cols-3 border-2 border-blue-500;
+    @apply h-75 w-75;
+  }
+  .square {
+    @apply outline outline-blue-500;
+    @apply cursor-pointer hover:bg-slate-200;
+    @apply relative;
+  }
+  .piece {
+    @apply absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2;
+  }
+}

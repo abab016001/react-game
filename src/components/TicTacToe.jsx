@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { processInit, processRule, processBot } from "../js/gameRules";
+import { useGlobalStore } from "../store/useGlobalStore";
 
 const Square = ({ id, value, onClick }) => {
   return <>
@@ -10,21 +11,24 @@ const Square = ({ id, value, onClick }) => {
 }
 
 export default function TicTacToe() {
-
+  const setGlobalPage = useGlobalStore(state => state.setGlobalPage);
+  const setGameOver = useGlobalStore(state => state.setGameOver);
+  const uuid = useGlobalStore(state => state.uuid);
   const [board, setBoard] = useState({});
   const [role, setRole] = useState("");
   const [squareId, setSquareId] = useState("");
 
   useEffect(() => {
     initGame();
-  }, [])
+  }, [uuid])
 
   useEffect(() => {
 
     const result = processRule({ board, role, squareId });
     if (result) {
       if (result.isEnd) {
-        return alert(`${result.role} 贏了！`);
+        setGameOver({ msg: `${result.role} 贏了！` });
+        setGlobalPage("GameOver");
       } else {
         if (result.role == "BOT") {
           handleBot();
@@ -35,6 +39,8 @@ export default function TicTacToe() {
   }, [board]); // board 更新後執行
 
   const initGame = () => {
+    setRole("");
+    setSquareId("");
     processInit({ setBoard });
   }
 

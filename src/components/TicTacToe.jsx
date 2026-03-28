@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { processRule, processBot } from "../js/gameRules";
+import { processInit, processRule, processBot } from "../js/gameRules";
 
 const Square = ({ id, value, onClick }) => {
   return <>
@@ -11,29 +11,17 @@ const Square = ({ id, value, onClick }) => {
 
 export default function TicTacToe() {
 
-  const [scoreboard, setScoreboard] = useState({
-    "square_1": "",
-    "square_2": "",
-    "square_3": "",
-    "square_4": "",
-    "square_5": "",
-    "square_6": "",
-    "square_7": "",
-    "square_8": "",
-    "square_9": ""
-  });
-
-  const [curRole, setCurRole] = useState("");
-  const [curPieceId, setCurPieceId] = useState("");
+  const [board, setBoard] = useState({});
+  const [role, setRole] = useState("");
+  const [squareId, setSquareId] = useState("");
 
   useEffect(() => {
-    console.log("TicTacToe rendered!");
     initGame();
   }, [])
 
   useEffect(() => {
 
-    const result = processRule({ scoreboard, curRole, curPieceId });
+    const result = processRule({ board, role, squareId });
     if (result) {
       if (result.isEnd) {
         return alert(`${result.role} 贏了！`);
@@ -44,36 +32,35 @@ export default function TicTacToe() {
       }
     }
 
-  }, [scoreboard]); // scoreboard 更新後執行
+  }, [board]); // board 更新後執行
 
   const initGame = () => {
-    console.log("遊戲初始化");
-    Object.keys(scoreboard).forEach(key => scoreboard[key] = ""); // 清空
+    processInit({ setBoard });
   }
 
   const handlePlayer = (id) => {
-    setScoreboard(prev => {
+    setBoard(prev => {
       if (!prev[id]) {
-        setCurRole("PLAYER");
-        setCurPieceId(id);
+        setRole("PLAYER");
+        setSquareId(id);
         return { ...prev, [id]: "O" };
       } else {
-        setCurRole("");
-        setCurPieceId("");
+        setRole("");
+        setSquareId("");
         return prev;
       }
     });
   }
 
   const handleBot = () => {
-    setScoreboard(prev => {
-      const id = processBot({ scoreboard: prev });
+    setBoard(prev => {
+      const id = processBot({ board: prev });
       if (id) {
-        setCurRole("BOT");
-        setCurPieceId(id);
+        setRole("BOT");
+        setSquareId(id);
         return { ...prev, [id]: "X" };
       } else {
-        setCurPieceId("");
+        setSquareId("");
         return prev;
       }
     });
@@ -81,7 +68,7 @@ export default function TicTacToe() {
 
   return (
     <div className="board">
-      {Object.entries(scoreboard).map(([id, val], index) => (
+      {Object.entries(board).map(([id, val], index) => (
         <Square key={index} id={id} value={val} onClick={handlePlayer} />
       ))}
     </div>

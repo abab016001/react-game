@@ -1,7 +1,60 @@
-const _getLayer = (id) => {
-  const [q, r] = [Math.floor(id / 3), id % 3];
-  const layer = q + (r > 0 ? 1 : 0)
-  return layer;
+const X = 3;
+
+const _getRow = (id) => {
+  const [q, r] = [Math.floor(id / X), id % X];
+  const row = q + (r > 0 ? 1 : 0)
+  return row;
+}
+
+const _getCol = (id) => {
+  const [q, r] = [Math.floor(id / X), id % X];
+  return r;
+}
+
+const _is_end = (board, val, curId) => {
+  const is_active_ids = Object.keys(board).filter(_id => board[_id] == val).map(x => x.split('square_')[1]);
+  if (is_active_ids.length < X) {
+    return false
+  }
+
+  const cur_row = _getRow(curId);
+  if (is_active_ids.map(_id => _getRow(_id)).filter(id_row => id_row == cur_row).length >= X) {
+    return true;
+  }
+  const cur_col = _getCol(curId);
+  if (is_active_ids.map(_id => _getCol(_id)).filter(id_col => id_col == cur_col).length >= X) {
+    return true;
+  }
+
+  const row_ary = Array(X).fill("").map((_, index) => index + 1);
+  const lt_rb_ids = [];
+  for (const r of row_ary) {
+    const c = r;
+    const val = X * (r - 1) + c;
+    lt_rb_ids.push(val);
+  }
+  if (lt_rb_ids.every(id => board[`square_${id}`] == val)) {
+    const _cols = lt_rb_ids.map(id => _getCol(id));
+    if (new Set(_cols).size == _cols.length) {
+      return true;
+    }
+  }
+
+  const col_ary = Array(X).fill("").map((_, index) => index + 1);
+  const lb_rt_ids = [];
+  for (const c of col_ary) {
+    const r = X + 1 - c;
+    const val = X * (r - 1) + c;
+    lb_rt_ids.push(val);
+  }
+  if (lb_rt_ids.every(id => board[`square_${id}`] == val)) {
+    const _rows = lb_rt_ids.map(id => _getRow(id));
+    if (new Set(_rows).size == _rows.length) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 export const processRule = ({ board, role, squareId }) => {
@@ -12,16 +65,8 @@ export const processRule = ({ board, role, squareId }) => {
     return null;
   }
 
-  const layer = _getLayer(curId);
-  const [row, col] = [
-    [curId - 2, curId - 1, curId, curId + 1, curId + 2].filter(x => x > 0 && _getLayer(x) == layer),
-    [curId - 6, curId - 3, curId, curId + 3, curId + 6].filter(x => x > 0 && _getLayer(x) <= 3)
-  ];
-
-  const row_ids = row.map(x => `square_${x}`);
-  const col_ids = col.map(x => `square_${x}`);
-  const is_O_end = row_ids.every(x => board[x] == "O") || col_ids.every(x => board[x] == "O");
-  const is_X_end = row_ids.every(x => board[x] == "X") || col_ids.every(x => board[x] == "X");
+  const is_O_end = _is_end(board, "O", curId);
+  const is_X_end = _is_end(board, "X", curId);
   switch (role) {
     case "PLAYER":
       if (is_O_end) {
@@ -37,6 +82,13 @@ export const processRule = ({ board, role, squareId }) => {
         return rtn;
       }
       break;
+  }
+
+  const no_active_ids = Object.keys(board).filter(_id => !board[_id]);
+  if (!no_active_ids.length) {
+    rtn.isEnd = true;
+    rtn.role = null;
+    return rtn;
   }
 
   if (role == "PLAYER") {

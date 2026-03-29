@@ -23,11 +23,14 @@ export default function TicTacToe() {
   }, [uuid])
 
   useEffect(() => {
-
     const result = processRule({ board, role, squareId });
     if (result) {
       if (result.isEnd) {
-        setGameOver({ msg: `${result.role} 贏了！` });
+        if (result.role) {
+          setGameOver({ msg: `${result.role} 贏了！` });
+        } else {
+          setGameOver({ msg: `和局！` });
+        }
         setGlobalPage("GameOver");
       } else {
         if (result.role == "BOT") {

@@ -44,7 +44,7 @@
     @apply text-5xl font-bold tracking-[0.5em] border-b border-gray-500;
   }
   .blockUI main {
-    @apply my-5 p-5 flex justify-center items-center;
+    @apply my-5 p-5 flex flex-col justify-center items-center gap-5;
     @apply text-4xl font-bold tracking-[0.5em];
   }
   .blockUI footer {

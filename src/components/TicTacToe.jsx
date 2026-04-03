@@ -11,9 +11,11 @@ const Square = ({ id, value, onClick }) => {
 }
 
 export default function TicTacToe() {
+  const [step, setStep] = [useGlobalStore(state => state.step), useGlobalStore(state => state.setStep)];
   const setGlobalPage = useGlobalStore(state => state.setGlobalPage);
   const setGameOver = useGlobalStore(state => state.setGameOver);
   const uuid = useGlobalStore(state => state.uuid);
+  const level = useGlobalStore(state => state.level);
   const [board, setBoard] = useState({});
   const [role, setRole] = useState("");
   const [squareId, setSquareId] = useState("");
@@ -27,7 +29,7 @@ export default function TicTacToe() {
     if (result) {
       if (result.isEnd) {
         if (result.role) {
-          setGameOver({ msg: `${result.role} 贏了！` });
+          setGameOver({ msg: `${result.role}贏了！`, winner: result.role });
         } else {
           setGameOver({ msg: `和局！` });
         }
@@ -59,11 +61,12 @@ export default function TicTacToe() {
         return prev;
       }
     });
+    setStep(step + 1);
   }
 
   const handleBot = () => {
     setBoard(prev => {
-      const id = processBot({ board: prev });
+      const id = processBot({ board: prev }, level);
       if (id) {
         setRole("BOT");
         setSquareId(id);
